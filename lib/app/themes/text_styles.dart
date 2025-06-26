@@ -101,7 +101,7 @@ class AppTextStyles {
     letterSpacing: -0.5,
   );
   
-  static TextStyle numberLarge = GoogleFons.jetBrainsMono(
+  static TextStyle numberLarge = GoogleFonts.jetBrainsMono(
     fontSize: 32,
     fontWeight: FontWeight.w800,
     letterSpacing: -0.8,
