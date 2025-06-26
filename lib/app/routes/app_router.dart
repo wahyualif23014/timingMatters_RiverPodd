@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../features/finance/presentation/pages/finance_overview_page.dart';
 import '../../../features/finance/presentation/pages/add_transaction_page.dart';
 import '../../../features/finance/presentation/pages/budget_page.dart';
-// import '../../../features/finance/presentation/pages/financial_goals_page.dart';
+import '../../../features/finance/presentation/pages/financial_goals_page.dart';
 
 // import '../../activities/presentation/pages/activities_page.dart';
 // import '../../activities/presentation/pages/add_activity_page.dart';
@@ -42,10 +42,10 @@ final appRouter = GoRouter(
       path: Routes.budget,
       builder: (context, state) => const BudgetPage(),
     ),
-    // GoRoute(
-    //   path: Routes.goals,
-    //   builder: (context, state) => const FinancialGoalsPage(),
-    // ),
+    GoRoute(
+      path: Routes.goals,
+      builder: (context, state) => const FinancialGoalsPage(),
+    ),
 
     //     // Habits
     //     GoRoute(

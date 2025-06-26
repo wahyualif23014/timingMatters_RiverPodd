@@ -5,7 +5,7 @@ class Routes {
   static const String financeOverview = '/finance-overview';
   static const String addTransaction = '/add-transaction';
   static const String budget = '/budget';
-  static const String goals = '/goals';
+  static const String goals = '/financial-goals';
 
   // Habits
   static const String habits = '/habits';

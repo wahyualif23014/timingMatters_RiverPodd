@@ -14,7 +14,7 @@ void main() async {
       appId: "1:664950467657:android:890766958a62fc1eb1e398",
       messagingSenderId: "664950467657",
       projectId: "timmingmatters",
-      databaseURL: "https://timmingmatters-default-rtdb.firebaseio.com ",
+      databaseURL: "https://timmingmatters-default-rtdb.firebaseio.com",
       storageBucket: "timmingmatters.firebasestorage.app",
     ),
   );
