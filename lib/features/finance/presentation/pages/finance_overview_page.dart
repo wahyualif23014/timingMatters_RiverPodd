@@ -151,7 +151,7 @@ class FinanceOverviewPage extends StatelessWidget {
         child: GlassmorphicContainer(
           width: MediaQuery.of(context).size.width * 0.7,
           height: 60,
-          borderRadius: 16,
+          borderRadius: 16.0,
           blur: 10,
           alignment: Alignment.center,
           border: 1.5,
