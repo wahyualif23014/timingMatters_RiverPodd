@@ -5,6 +5,9 @@ import 'package:uuid/uuid.dart'; // For generating unique IDs
 import 'package:firebase_core/firebase_core.dart'; // Import for FirebaseException
 import '../../data/models/financial_goal_model.dart';
 import '../../data/providers/financial_goals_provider.dart';
+import 'package:glassmorphism/glassmorphism.dart'; // Import glassmorphism
+import 'package:flutter_animate/flutter_animate.dart'; // Import flutter_animate
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class FinancialGoalsPage extends ConsumerWidget {
   const FinancialGoalsPage({super.key});
@@ -23,153 +26,284 @@ class FinancialGoalsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final financialGoalsAsyncValue = ref.watch(financialGoalsProvider);
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
     return Scaffold(
+      extendBodyBehindAppBar: true, // Allow body to go behind transparent app bar
       appBar: AppBar(
-        title: const Text('Financial Goals'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
+        title: Text(
+          'Financial Goals',
+          style: GoogleFonts.inter( // Use Inter font for a clean look
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
+        ),
+        backgroundColor: Colors.transparent, // Transparent AppBar
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            isIOS ? Icons.arrow_back_ios : Icons.arrow_back, // iOS-style back arrow
+            color: Colors.white,
+          ),
+          onPressed: () {
+            // Use Navigator.pop for simple back navigation in this context
+            Navigator.of(context).pop();
+          },
+        ),
       ),
-      body: financialGoalsAsyncValue.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) {
-          // Detect and display specific error messages for the initial data load
-          String errorMessage = 'Failed to load goals: ${error.toString()}';
-          if (error is FirebaseException) {
-            errorMessage = 'Firebase Error: ${error.message ?? error.code}';
-          }
-          debugPrint('Error loading financial goals: $error\n$stack'); // Log full error for debugging
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 50),
-                  const SizedBox(height: 10),
-                  Text(
-                    errorMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  // Optionally, add a retry button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Re-initialize the provider to attempt a reload
-                      ref.invalidate(financialGoalsProvider);
-                    },
-                    child: const Text('Retry'),
-                  ),
+      body: Stack(
+        children: [
+          // Background with Gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF1A237E), // Deep Indigo
+                  Color(0xFF42A5F5), // Light Blue
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-          );
-        },
-        data: (goals) {
-          if (goals.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.lightbulb_outline, color: Colors.grey, size: 60),
-                    SizedBox(height: 10),
-                    Text(
-                      'Tidak ada target keuangan yang ditemukan.\nMari tambahkan target pertamamu!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: goals.length,
-            itemBuilder: (context, index) {
-              final goal = goals[index];
-              final progress = goal.targetAmount > 0 ? (goal.savedAmount / goal.targetAmount).clamp(0.0, 1.0) : 0.0;
-
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.symmetric(vertical: 8.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          financialGoalsAsyncValue.when(
+            loading: () => Center(
+              child: const CircularProgressIndicator(color: Colors.white).animate().fadeIn(duration: 500.ms),
+            ),
+            error: (error, stack) {
+              String errorMessage = 'Failed to load goals: ${error.toString()}';
+              if (error is FirebaseException) {
+                errorMessage = 'Firebase Error: ${error.message ?? error.code}';
+              }
+              debugPrint('Error loading financial goals: $error\n$stack'); // Log full error for debugging
+              return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        goal.title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.teal,
-                        ),
+                  child: Animate(
+                    effects: [FadeEffect(duration: 600.ms), ScaleEffect(duration: 600.ms, curve: Curves.easeOutBack)],
+                    child: GlassmorphicContainer(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      borderRadius: 24,
+                      blur: 15,
+                      alignment: Alignment.center,
+                      border: 2,
+                      linearGradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.red.withOpacity(0.15),
+                          Colors.red.withOpacity(0.05),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Target: \$${goal.targetAmount.toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 16),
+                      borderGradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.red.withOpacity(0.5),
+                          Colors.red.withOpacity(0.05),
+                        ],
                       ),
-                      Text(
-                        'Saved: \$${goal.savedAmount.toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 12),
-                      LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.grey[300],
-                        color: Colors.lightGreen,
-                        minHeight: 10,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Progress: ${(progress * 100).toStringAsFixed(1)}%',
-                        style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () => _showGoalForm(context, ref, goal: goal),
+                          const Icon(Icons.error_outline, color: Colors.white, size: 50).animate().shake(hz: 2, curve: Curves.easeInOut),
+                          const SizedBox(height: 10),
+                          Text(
+                            errorMessage,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.add, color: Colors.green),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
                             onPressed: () {
-                              _showAddProgressDialog(context, ref, goal);
+                              ref.invalidate(financialGoalsProvider);
                             },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _confirmDelete(context, ref, goal.id, goal.title),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withOpacity(0.2), // Glassy button
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            ),
+                            child: const Text('Retry'),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
             },
-          );
-        },
+            data: (goals) {
+              if (goals.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Animate(
+                      effects: [FadeEffect(duration: 600.ms), SlideEffect(begin: Offset(0, 0.2), duration: 600.ms, curve: Curves.easeOutCubic)],
+                      child: GlassmorphicContainer(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        borderRadius: 24,
+                        blur: 15,
+                        alignment: Alignment.center,
+                        border: 2,
+                        linearGradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.15),
+                            Colors.white.withOpacity(0.05),
+                          ],
+                        ),
+                        borderGradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.5),
+                            Colors.white.withOpacity(0.05),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.lightbulb_outline, color: Colors.white, size: 60),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Tidak ada target keuangan yang ditemukan.\nMari tambahkan target pertamamu!',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(fontSize: 18, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.only(top: kToolbarHeight + 40, left: 16.0, right: 16.0, bottom: 80.0), // Adjust padding for app bar and FAB
+                itemCount: goals.length,
+                itemBuilder: (context, index) {
+                  final goal = goals[index];
+                  final progress = goal.targetAmount > 0 ? (goal.savedAmount / goal.targetAmount).clamp(0.0, 1.0) : 0.0;
+
+                  return Animate(
+                    effects: [
+                      FadeEffect(duration: 500.ms, delay: (50 * index).ms),
+                      SlideEffect(begin: const Offset(0, 0.5), duration: 500.ms, delay: (50 * index).ms, curve: Curves.easeOutCubic),
+                    ],
+                    child: GlassmorphicContainer(
+                      width: double.infinity,
+                      height: 200, // Add a suitable height value here
+                      borderRadius: 16,
+                      blur: 10,
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      alignment: Alignment.center,
+                      border: 1.5,
+                      linearGradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.1),
+                          Colors.white.withOpacity(0.02),
+                        ],
+                      ),
+                      borderGradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.4),
+                          Colors.white.withOpacity(0.01),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              goal.title,
+                              style: GoogleFonts.inter(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Target: \$${goal.targetAmount.toStringAsFixed(2)}',
+                              style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.8)),
+                            ),
+                            Text(
+                              'Saved: \$${goal.savedAmount.toStringAsFixed(2)}',
+                              style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.8)),
+                            ),
+                            const SizedBox(height: 12),
+                            LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.white.withOpacity(0.3),
+                              color: Colors.lightGreenAccent, // Brighter color for progress
+                              minHeight: 10,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Progress: ${(progress * 100).toStringAsFixed(1)}%',
+                              style: GoogleFonts.inter(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.white.withOpacity(0.7)),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                _buildGlassyIconButton(context, Icons.edit, Colors.blueAccent, () => _showGoalForm(context, ref, goal: goal)),
+                                _buildGlassyIconButton(context, Icons.add, Colors.lightGreenAccent, () { _showAddProgressDialog(context, ref, goal); }),
+                                _buildGlassyIconButton(context, Icons.delete, Colors.redAccent, () => _confirmDelete(context, ref, goal.id, goal.title)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showGoalForm(context, ref),
-        label: const Text('Add Goal'),
-        icon: const Icon(Icons.add),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
+      floatingActionButton: Animate(
+        effects: [FadeEffect(duration: 500.ms, delay: 1000.ms), ScaleEffect(duration: 500.ms, delay: 1000.ms, curve: Curves.easeOutBack)],
+        child: FloatingActionButton.extended(
+          onPressed: () => _showGoalForm(context, ref),
+          label: Text('Add Goal', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+          icon: const Icon(Icons.add),
+          backgroundColor: Colors.white.withOpacity(0.2), // Glassy FAB
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildGlassyIconButton(BuildContext context, IconData icon, Color color, VoidCallback onPressed) {
+    return Animate(
+      effects: [ScaleEffect(duration: 200.ms, curve: Curves.easeInOut)],
+      child: IconButton(
+        icon: Icon(icon, color: color.withOpacity(0.8), size: 28),
+        onPressed: onPressed,
+        tooltip: 'Edit', // Add tooltip for accessibility
       ),
     );
   }
 
+  // Dialogs with Glassmorphism Theme
   void _showGoalForm(BuildContext context, WidgetRef ref, {FinancialGoalModel? goal}) {
     final TextEditingController titleController = TextEditingController(text: goal?.title ?? '');
     final TextEditingController targetAmountController = TextEditingController(text: goal?.targetAmount.toString() ?? '');
@@ -179,82 +313,146 @@ class FinancialGoalsPage extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(goal == null ? 'Add New Goal' : 'Edit Goal'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Goal Title', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: targetAmountController,
-                  decoration: const InputDecoration(labelText: 'Target Amount', border: OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 10),
-                // savedAmount is only set initially for new goals, not editable for existing ones
-                if (goal == null) // Show only for adding new goal
-                  TextField(
-                    controller: savedAmountController,
-                    decoration: const InputDecoration(labelText: 'Saved Amount', border: OutlineInputBorder()),
-                    keyboardType: TextInputType.number,
-                  ),
+          backgroundColor: Colors.transparent, // Make background transparent for glassmorphism
+          contentPadding: EdgeInsets.zero, // Remove default padding
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          content: GlassmorphicContainer(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: 420, // Add a suitable height for the dialog
+            borderRadius: 24,
+            blur: 15,
+            border: 2,
+            linearGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blueGrey.withOpacity(0.15), // Darker glassmorphism for dialogs
+                Colors.blueGrey.withOpacity(0.05),
               ],
             ),
+            borderGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.05),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    goal == null ? 'Add New Goal' : 'Edit Goal',
+                    style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: titleController,
+                    style: GoogleFonts.inter(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Goal Title',
+                      labelStyle: GoogleFonts.inter(color: Colors.white.withOpacity(0.7)),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.5)), borderRadius: BorderRadius.circular(12)),
+                      focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white, width: 2), borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: targetAmountController,
+                    style: GoogleFonts.inter(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Target Amount',
+                      labelStyle: GoogleFonts.inter(color: Colors.white.withOpacity(0.7)),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.5)), borderRadius: BorderRadius.circular(12)),
+                      focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white, width: 2), borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 10),
+                  if (goal == null)
+                    TextField(
+                      controller: savedAmountController,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Saved Amount',
+                        labelStyle: GoogleFonts.inter(color: Colors.white.withOpacity(0.7)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.5)), borderRadius: BorderRadius.circular(12)),
+                        focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white, width: 2), borderRadius: BorderRadius.circular(12)),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.1),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.7)),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final title = titleController.text.trim();
+                          final targetAmount = double.tryParse(targetAmountController.text) ?? 0.0;
+                          final savedAmount = goal == null ? (double.tryParse(savedAmountController.text) ?? 0.0) : goal.savedAmount;
+
+                          if (title.isEmpty || targetAmount <= 0) {
+                            _showSnackBar(context, 'Judul dan jumlah target harus valid dan lebih dari 0.', isError: true);
+                            return;
+                          }
+
+                          final notifier = ref.read(financialGoalsProvider.notifier);
+                          try {
+                            if (goal == null) {
+                              final newGoal = FinancialGoalModel(
+                                id: const Uuid().v4(),
+                                title: title,
+                                targetAmount: targetAmount,
+                                savedAmount: savedAmount,
+                              );
+                              await notifier.addGoal(newGoal);
+                              _showSnackBar(context, 'Target "${newGoal.title}" berhasil ditambahkan!');
+                            } else {
+                              final updates = {
+                                'title': title,
+                                'targetAmount': targetAmount,
+                              };
+                              await notifier.updateGoal(goal.id, updates);
+                              _showSnackBar(context, 'Target "${goal.title}" berhasil diperbarui!');
+                            }
+                            Navigator.pop(context);
+                          } catch (e, st) {
+                            String errorMessage = 'Gagal menyimpan target.';
+                            if (e is FirebaseException) {
+                              errorMessage = 'Kesalahan Firebase: ${e.message ?? e.code}';
+                            }
+                            debugPrint('Error saving goal: $e\n$st');
+                            _showSnackBar(context, '$errorMessage Mohon coba lagi.', isError: true);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+                        ),
+                        child: Text(goal == null ? 'Tambah' : 'Perbarui'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final title = titleController.text.trim(); // Trim whitespace
-                final targetAmount = double.tryParse(targetAmountController.text) ?? 0.0;
-                final savedAmount = goal == null ? (double.tryParse(savedAmountController.text) ?? 0.0) : goal.savedAmount; // Only read if new goal
-
-                if (title.isEmpty || targetAmount <= 0) {
-                  _showSnackBar(context, 'Judul dan jumlah target harus valid dan lebih dari 0.', isError: true);
-                  return;
-                }
-
-                final notifier = ref.read(financialGoalsProvider.notifier);
-                try {
-                  if (goal == null) {
-                    // Add new goal
-                    final newGoal = FinancialGoalModel(
-                      id: const Uuid().v4(), // Generate a unique ID
-                      title: title,
-                      targetAmount: targetAmount,
-                      savedAmount: savedAmount,
-                    );
-                    await notifier.addGoal(newGoal);
-                    _showSnackBar(context, 'Target "${newGoal.title}" berhasil ditambahkan!');
-                  } else {
-                    // Update existing goal
-                    final updates = {
-                      'title': title,
-                      'targetAmount': targetAmount,
-                    };
-                    await notifier.updateGoal(goal.id, updates);
-                    _showSnackBar(context, 'Target "${goal.title}" berhasil diperbarui!');
-                  }
-                  Navigator.pop(context);
-                } catch (e, st) {
-                  String errorMessage = 'Gagal menyimpan target.';
-                  if (e is FirebaseException) {
-                    errorMessage = 'Kesalahan Firebase: ${e.message ?? e.code}';
-                  }
-                  debugPrint('Error saving goal: $e\n$st'); // Log full error for debugging
-                  _showSnackBar(context, '$errorMessage Mohon coba lagi.', isError: true);
-                }
-              },
-              child: Text(goal == null ? 'Tambah' : 'Perbarui'),
-            ),
-          ],
         );
       },
     );
@@ -267,42 +465,101 @@ class FinancialGoalsPage extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Tambahkan progres ke "${goal.title}"'),
-          content: TextField(
-            controller: amountController,
-            decoration: const InputDecoration(labelText: 'Jumlah yang akan ditambahkan', border: OutlineInputBorder()),
-            keyboardType: TextInputType.number,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Batal'),
+          backgroundColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          content: GlassmorphicContainer(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: 260, // Add a suitable height for the dialog
+            borderRadius: 24,
+            blur: 15,
+            border: 2,
+            linearGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blueGrey.withOpacity(0.15),
+                Colors.blueGrey.withOpacity(0.05),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final amountToAdd = double.tryParse(amountController.text) ?? 0.0;
-                if (amountToAdd <= 0) {
-                  _showSnackBar(context, 'Harap masukkan jumlah positif.', isError: true);
-                  return;
-                }
+            borderGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.05),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Tambahkan progres ke "${goal.title}"',
+                    style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: amountController,
+                    style: GoogleFonts.inter(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Jumlah yang akan ditambahkan',
+                      labelStyle: GoogleFonts.inter(color: Colors.white.withOpacity(0.7)),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.5)), borderRadius: BorderRadius.circular(12)),
+                      focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white, width: 2), borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.7)),
+                        child: const Text('Batal'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final amountToAdd = double.tryParse(amountController.text) ?? 0.0;
+                          if (amountToAdd <= 0) {
+                            _showSnackBar(context, 'Harap masukkan jumlah positif.', isError: true);
+                            return;
+                          }
 
-                try {
-                  final newSavedAmount = goal.savedAmount + amountToAdd;
-                  await ref.read(financialGoalsProvider.notifier).updateGoalProgress(goal.id, newSavedAmount);
-                  _showSnackBar(context, 'Progres berhasil ditambahkan ke "${goal.title}"!');
-                  Navigator.pop(context);
-                } catch (e, st) {
-                  String errorMessage = 'Gagal menambahkan progres.';
-                  if (e is FirebaseException) {
-                    errorMessage = 'Kesalahan Firebase: ${e.message ?? e.code}';
-                  }
-                  debugPrint('Error adding progress: $e\n$st'); // Log full error for debugging
-                  _showSnackBar(context, '$errorMessage Mohon coba lagi.', isError: true);
-                }
-              },
-              child: const Text('Tambah'),
+                          try {
+                            final newSavedAmount = goal.savedAmount + amountToAdd;
+                            await ref.read(financialGoalsProvider.notifier).updateGoalProgress(goal.id, newSavedAmount);
+                            _showSnackBar(context, 'Progres berhasil ditambahkan ke "${goal.title}"!');
+                            Navigator.pop(context);
+                          } catch (e, st) {
+                            String errorMessage = 'Gagal menambahkan progres.';
+                            if (e is FirebaseException) {
+                              errorMessage = 'Kesalahan Firebase: ${e.message ?? e.code}';
+                            }
+                            debugPrint('Error adding progress: $e\n$st');
+                            _showSnackBar(context, '$errorMessage Mohon coba lagi.', isError: true);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+                        ),
+                        child: const Text('Tambah'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
@@ -313,32 +570,85 @@ class FinancialGoalsPage extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Konfirmasi Penghapusan'),
-          content: Text('Apakah Anda yakin ingin menghapus target "$title"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Batal'),
+          backgroundColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          content: GlassmorphicContainer(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: 220, // Added required height parameter
+            borderRadius: 24,
+            blur: 15,
+            border: 2,
+            linearGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blueGrey.withOpacity(0.15),
+                Colors.blueGrey.withOpacity(0.05),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await ref.read(financialGoalsProvider.notifier).deleteGoal(id);
-                  _showSnackBar(context, 'Target "$title" berhasil dihapus!');
-                  Navigator.pop(context);
-                } catch (e, st) {
-                  String errorMessage = 'Gagal menghapus target.';
-                  if (e is FirebaseException) {
-                    errorMessage = 'Kesalahan Firebase: ${e.message ?? e.code}';
-                  }
-                  debugPrint('Error deleting goal: $e\n$st'); // Log full error for debugging
-                  _showSnackBar(context, '$errorMessage Mohon coba lagi.', isError: true);
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+            borderGradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withOpacity(0.5),
+                Colors.white.withOpacity(0.05),
+              ],
             ),
-          ],
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Konfirmasi Penghapusan',
+                    style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Apakah Anda yakin ingin menghapus target "$title"?',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(color: Colors.white.withOpacity(0.8), fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.7)),
+                        child: const Text('Batal'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            await ref.read(financialGoalsProvider.notifier).deleteGoal(id);
+                            _showSnackBar(context, 'Target "$title" berhasil dihapus!');
+                            Navigator.pop(context);
+                          } catch (e, st) {
+                            String errorMessage = 'Gagal menghapus target.';
+                            if (e is FirebaseException) {
+                              errorMessage = 'Kesalahan Firebase: ${e.message ?? e.code}';
+                            }
+                            debugPrint('Error deleting goal: $e\n$st');
+                            _showSnackBar(context, '$errorMessage Mohon coba lagi.', isError: true);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent.withOpacity(0.2), // Red for delete, glassy
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: Colors.redAccent.withOpacity(0.3), width: 1),
+                        ),
+                        child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
