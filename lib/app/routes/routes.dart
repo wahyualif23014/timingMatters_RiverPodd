@@ -2,10 +2,10 @@ class Routes {
   static const String dashboard = '/dashboard';
 
   // Finance
-  static const String financeOverview = '/finance';
-  static const String addTransaction = '/finance/add';
-  static const String budget = '/finance/budget';
-  static const String goals = '/finance/goals';
+  static const String financeOverview = '/finance-overview';
+  static const String addTransaction = '/add-transaction';
+  static const String budget = '/budget';
+  static const String goals = '/goals';
 
   // Habits
   static const String habits = '/habits';

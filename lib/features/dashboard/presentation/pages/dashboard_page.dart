@@ -34,11 +34,11 @@ class DashboardPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: ListView(
                 children: [
-                  // GlassDashboardTile(
-                  //   title: 'Finance',
-                  //   icon: Icons.account_balance_wallet,
-                  //   onTap: () => context.push(Routes.financeOverview),
-                  // ),
+                  GlassDashboardTile(
+                    title: 'Finance',
+                    icon: Icons.account_balance_wallet,
+                    onTap: () => context.push('/finance-overview'),
+                  ),
                   // GlassDashboardTile(
                   //   title: 'Habits',
                   //   icon: Icons.check_circle_outline,
