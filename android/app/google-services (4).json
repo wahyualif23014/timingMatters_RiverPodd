@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "664950467657",
+    "firebase_url": "https://timmingmatters-default-rtdb.firebaseio.com",
+    "project_id": "timmingmatters",
+    "storage_bucket": "timmingmatters.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:664950467657:android:890766958a62fc1eb1e398",
+        "android_client_info": {
+          "package_name": "time.towin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMYRsnkEAaKJM661Q8vPROW4aI3r6Gd9Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
