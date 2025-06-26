@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "664950467657",
-    "firebase_url": "https://timmingmatters-default-rtdb.firebaseio.com",
-    "project_id": "timmingmatters",
-    "storage_bucket": "timmingmatters.firebasestorage.app"
+    "project_number": "523600901086",
+    "firebase_url": "https://hexagontm-7062a-default-rtdb.firebaseio.com",
+    "project_id": "hexagontm-7062a",
+    "storage_bucket": "hexagontm-7062a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:664950467657:android:890766958a62fc1eb1e398",
+        "mobilesdk_app_id": "1:523600901086:android:33685a8b65be0a2cfd234f",
         "android_client_info": {
-          "package_name": "time.towin"
+          "package_name": "timemater.hexa"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBMYRsnkEAaKJM661Q8vPROW4aI3r6Gd9Q"
+          "current_key": "AIzaSyDF8zpOC46WCJ3OZaHS4xYJppz_iNt-pPk"
         }
       ],
       "services": {

@@ -1,3 +1,4 @@
+// data/models/financial_goal_model.dart
 import '../../domain/entities/financial_goal_entity.dart';
 
 class FinancialGoalModel extends FinancialGoalEntity {
@@ -10,7 +11,7 @@ class FinancialGoalModel extends FinancialGoalEntity {
 
   factory FinancialGoalModel.fromJson(Map<String, dynamic> json) {
     return FinancialGoalModel(
-      id: json['id'],
+      id: json['id'], 
       title: json['title'],
       targetAmount: (json['targetAmount'] as num).toDouble(),
       savedAmount: (json['savedAmount'] as num).toDouble(),
@@ -18,8 +19,7 @@ class FinancialGoalModel extends FinancialGoalEntity {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
+        'title': title, 
         'targetAmount': targetAmount,
         'savedAmount': savedAmount,
       };

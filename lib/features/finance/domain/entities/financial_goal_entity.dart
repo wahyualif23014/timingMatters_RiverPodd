@@ -1,3 +1,4 @@
+// domain/entities/financial_goal_entity.dart
 class FinancialGoalEntity {
   final String id;
   final String title;

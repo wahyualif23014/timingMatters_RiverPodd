@@ -1,8 +1,9 @@
 // data/repositories/finance_repository.dart
+import 'package:firebase_core/firebase_core.dart'; // Import for FirebaseException
 import 'package:firebase_database/firebase_database.dart';
 import '../models/financial_goal_model.dart';
-import '../models/budget_model.dart';
-import '../models/transaction_model.dart';
+import '../models/budget_model.dart'; // Pastikan BudgetModel diimpor
+import '../models/transaction_model.dart'; // Pastikan TransactionModel diimpor
 
 class FinanceRepository {
   final DatabaseReference _db = FirebaseDatabase.instance.ref();
@@ -17,59 +18,122 @@ class FinanceRepository {
       if (event.snapshot.value != null) {
         final Map<dynamic, dynamic> values = event.snapshot.value as Map<dynamic, dynamic>;
         values.forEach((key, value) {
-          final goalData = Map<String, dynamic>.from(value as Map);
-          goalData['id'] = key; // Ensure ID is set
-          final goal = FinancialGoalModel.fromJson(goalData);
-          goals.add(goal);
+          try {
+            final goalData = Map<String, dynamic>.from(value as Map);
+            goalData['id'] = key; // Ensure ID is set
+            final goal = FinancialGoalModel.fromJson(goalData);
+            goals.add(goal);
+          } catch (e, st) {
+            // Log parsing errors for individual goals but allow others to load
+            print('Error parsing financial goal with key $key: $e\n$st');
+          }
         });
       }
-
       return goals;
     });
   }
 
   Future<void> addGoal(FinancialGoalModel goal) async {
-    await _goalsRef.child(goal.id).set(goal.toJson());
+    try {
+      await _goalsRef.child(goal.id).set(goal.toJson());
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error adding goal: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error adding goal: $e\n$st');
+      rethrow;
+    }
   }
 
   Future<void> updateGoal(String id, Map<String, dynamic> updates) async {
-    await _goalsRef.child(id).update(updates);
+    try {
+      await _goalsRef.child(id).update(updates);
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error updating goal $id: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error updating goal $id: $e\n$st');
+      rethrow;
+    }
   }
 
   Future<void> deleteGoal(String id) async {
-    await _goalsRef.child(id).remove();
+    try {
+      await _goalsRef.child(id).remove();
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error deleting goal $id: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error deleting goal $id: $e\n$st');
+      rethrow;
+    }
   }
 
   // === BUDGETS ===
   DatabaseReference get _budgetsRef => _db.child('budgets');
 
   Future<List<BudgetModel>> fetchBudgets() async {
-    final snapshot = await _budgetsRef.get();
-    final List<BudgetModel> budgets = [];
+    try {
+      final snapshot = await _budgetsRef.get();
+      final List<BudgetModel> budgets = [];
 
-    if (snapshot.value != null) {
-      final Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
-      values.forEach((key, value) {
-        final budgetData = Map<String, dynamic>.from(value as Map);
-        budgetData['id'] = key; // Ensure ID is set
-        final budget = BudgetModel.fromJson(budgetData);
-        budgets.add(budget);
-      });
+      if (snapshot.value != null) {
+        final Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, value) {
+          try {
+            final budgetData = Map<String, dynamic>.from(value as Map);
+            budgetData['id'] = key; // Ensure ID is set
+            final budget = BudgetModel.fromJson(budgetData);
+            budgets.add(budget);
+          } catch (e, st) {
+            print('Error parsing budget with key $key: $e\n$st');
+          }
+        });
+      }
+      return budgets;
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error fetching budgets: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error fetching budgets: $e\n$st');
+      rethrow;
     }
-
-    return budgets;
   }
 
   Future<void> addBudget(BudgetModel budget) async {
-    await _budgetsRef.child(budget.id).set(budget.toJson());
+    try {
+      await _budgetsRef.child(budget.id).set(budget.toJson());
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error adding budget: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error adding budget: $e\n$st');
+      rethrow;
+    }
   }
 
   Future<void> updateBudget(BudgetModel budget) async {
-    await _budgetsRef.child(budget.id).update(budget.toJson());
+    try {
+      await _budgetsRef.child(budget.id).update(budget.toJson());
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error updating budget ${budget.id}: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error updating budget ${budget.id}: $e\n$st');
+      rethrow;
+    }
   }
 
   Future<void> deleteBudget(String id) async {
-    await _budgetsRef.child(id).remove();
+    try {
+      await _budgetsRef.child(id).remove();
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error deleting budget $id: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error deleting budget $id: $e\n$st');
+      rethrow;
+    }
   }
 
   // === TRANSACTIONS ===
@@ -84,44 +148,56 @@ class FinanceRepository {
       if (snapshot.value != null) {
         final Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
         values.forEach((key, value) {
-          final transactionData = Map<String, dynamic>.from(value as Map);
-          transactionData['id'] = key; // Ensure ID is set
-          final transaction = TransactionModel.fromJson(transactionData);
-          transactions.add(transaction);
+          try {
+            final transactionData = Map<String, dynamic>.from(value as Map);
+            transactionData['id'] = key; // Ensure ID is set
+            final transaction = TransactionModel.fromJson(transactionData);
+            transactions.add(transaction);
+          } catch (e, st) {
+            print('Error parsing transaction with key $key: $e\n$st');
+          }
         });
       }
-
-      // Sort transaksi berdasarkan tanggal (terbaru dulu)
       transactions.sort((a, b) => b.date.compareTo(a.date));
       return transactions;
-    } catch (e) {
-      throw Exception('Failed to fetch transactions: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error fetching transactions: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error fetching transactions: $e\n$st');
+      rethrow;
     }
   }
 
   /// Menambah transaksi baru ke Firebase Realtime Database
   Future<void> addTransaction(TransactionModel transaction) async {
     try {
-      // Tidak menyimpan ID dalam data JSON karena akan jadi key
       final transactionData = transaction.toJson();
-      transactionData.remove('id'); // Remove ID dari data
-      
+      transactionData.remove('id'); // Remove ID from data as it will be the key
+
       await _transactionsRef.child(transaction.id).set(transactionData);
-    } catch (e) {
-      throw Exception('Failed to add transaction: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error adding transaction: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error adding transaction: $e\n$st');
+      rethrow;
     }
   }
 
   /// Mengupdate transaksi yang sudah ada
   Future<void> updateTransaction(TransactionModel transaction) async {
     try {
-      // Tidak menyimpan ID dalam data JSON karena akan jadi key
       final transactionData = transaction.toJson();
-      transactionData.remove('id'); // Remove ID dari data
-      
+      transactionData.remove('id'); // Remove ID from data as it will be the key
+
       await _transactionsRef.child(transaction.id).update(transactionData);
-    } catch (e) {
-      throw Exception('Failed to update transaction: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error updating transaction ${transaction.id}: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error updating transaction ${transaction.id}: $e\n$st');
+      rethrow;
     }
   }
 
@@ -129,8 +205,12 @@ class FinanceRepository {
   Future<void> deleteTransaction(String id) async {
     try {
       await _transactionsRef.child(id).remove();
-    } catch (e) {
-      throw Exception('Failed to delete transaction: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error deleting transaction $id: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error deleting transaction $id: $e\n$st');
+      rethrow;
     }
   }
 
@@ -138,15 +218,19 @@ class FinanceRepository {
   Future<TransactionModel?> getTransactionById(String id) async {
     try {
       final snapshot = await _transactionsRef.child(id).get();
-      
+
       if (snapshot.value != null) {
         final transactionData = Map<String, dynamic>.from(snapshot.value as Map);
         transactionData['id'] = id; // Set ID
         return TransactionModel.fromJson(transactionData);
       }
       return null;
-    } catch (e) {
-      throw Exception('Failed to get transaction by ID: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting transaction by ID $id: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting transaction by ID $id: $e\n$st');
+      rethrow;
     }
   }
 
@@ -157,40 +241,48 @@ class FinanceRepository {
           .orderByChild('category')
           .equalTo(category)
           .get();
-      
+
       final List<TransactionModel> transactions = [];
-      
+
       if (snapshot.value != null) {
         final Map<dynamic, dynamic> values = snapshot.value as Map<dynamic, dynamic>;
         values.forEach((key, value) {
-          final transactionData = Map<String, dynamic>.from(value as Map);
-          transactionData['id'] = key;
-          final transaction = TransactionModel.fromJson(transactionData);
-          transactions.add(transaction);
+          try {
+            final transactionData = Map<String, dynamic>.from(value as Map);
+            transactionData['id'] = key;
+            final transaction = TransactionModel.fromJson(transactionData);
+            transactions.add(transaction);
+          } catch (e, st) {
+            print('Error parsing transaction with key $key (category $category): $e\n$st');
+          }
         });
       }
-      
       transactions.sort((a, b) => b.date.compareTo(a.date));
       return transactions;
-    } catch (e) {
-      throw Exception('Failed to get transactions by category: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting transactions by category $category: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting transactions by category $category: $e\n$st');
+      rethrow;
     }
   }
 
   /// Mengambil transaksi berdasarkan rentang tanggal
-  Future<List<TransactionModel>> getTransactionsByDateRange(
-    DateTime startDate, 
-    DateTime endDate
-  ) async {
+  Future<List<TransactionModel>> getTransactionsByDateRange(DateTime startDate, DateTime endDate) async {
     try {
       final transactions = await fetchTransactions();
-      
+
       return transactions.where((transaction) {
         return transaction.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
-               transaction.date.isBefore(endDate.add(const Duration(days: 1)));
+            transaction.date.isBefore(endDate.add(const Duration(days: 1)));
       }).toList();
-    } catch (e) {
-      throw Exception('Failed to get transactions by date range: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting transactions by date range: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting transactions by date range: $e\n$st');
+      rethrow;
     }
   }
 
@@ -201,8 +293,12 @@ class FinanceRepository {
       return transactions
           .where((t) => t.isIncome)
           .fold<double>(0.0, (double sum, t) => sum + t.amount);
-    } catch (e) {
-      throw Exception('Failed to get total income: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting total income: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting total income: $e\n$st');
+      rethrow;
     }
   }
 
@@ -213,8 +309,12 @@ class FinanceRepository {
       return transactions
           .where((t) => !t.isIncome)
           .fold<double>(0.0, (double sum, t) => sum + t.amount);
-    } catch (e) {
-      throw Exception('Failed to get total expense: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting total expense: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting total expense: $e\n$st');
+      rethrow;
     }
   }
 
@@ -224,8 +324,12 @@ class FinanceRepository {
       final income = await getTotalIncome();
       final expense = await getTotalExpense();
       return income - expense;
-    } catch (e) {
-      throw Exception('Failed to get balance: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting balance: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting balance: $e\n$st');
+      rethrow;
     }
   }
 
@@ -234,20 +338,28 @@ class FinanceRepository {
     try {
       final Map<String, Object?> updates = {};
       for (String id in ids) {
-        updates[id] = null; // Set null untuk menghapus
+        updates[id] = null; // Set null to delete
       }
       await _transactionsRef.update(updates);
-    } catch (e) {
-      throw Exception('Failed to delete multiple transactions: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error deleting multiple transactions: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error deleting multiple transactions: $e\n$st');
+      rethrow;
     }
   }
 
-  /// Clear all transactions (gunakan dengan hati-hati!)
+  /// Clear all transactions (use with caution!)
   Future<void> clearAllTransactions() async {
     try {
       await _transactionsRef.remove();
-    } catch (e) {
-      throw Exception('Failed to clear all transactions: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error clearing all transactions: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error clearing all transactions: $e\n$st');
+      rethrow;
     }
   }
 
@@ -255,17 +367,20 @@ class FinanceRepository {
   Stream<List<TransactionModel>> watchTransactions() {
     return _transactionsRef.onValue.map((event) {
       final List<TransactionModel> transactions = [];
-      
+
       if (event.snapshot.value != null) {
         final Map<dynamic, dynamic> values = event.snapshot.value as Map<dynamic, dynamic>;
         values.forEach((key, value) {
-          final transactionData = Map<String, dynamic>.from(value as Map);
-          transactionData['id'] = key;
-          final transaction = TransactionModel.fromJson(transactionData);
-          transactions.add(transaction);
+          try {
+            final transactionData = Map<String, dynamic>.from(value as Map);
+            transactionData['id'] = key;
+            final transaction = TransactionModel.fromJson(transactionData);
+            transactions.add(transaction);
+          } catch (e, st) {
+            print('Error parsing transaction with key $key (watchTransactions): $e\n$st');
+          }
         });
       }
-      
       transactions.sort((a, b) => b.date.compareTo(a.date));
       return transactions;
     });
@@ -278,49 +393,52 @@ class FinanceRepository {
         .equalTo(category)
         .onValue
         .map((event) {
-      final List<TransactionModel> transactions = [];
-      
-      if (event.snapshot.value != null) {
-        final Map<dynamic, dynamic> values = event.snapshot.value as Map<dynamic, dynamic>;
-        values.forEach((key, value) {
-          final transactionData = Map<String, dynamic>.from(value as Map);
-          transactionData['id'] = key;
-          final transaction = TransactionModel.fromJson(transactionData);
-          transactions.add(transaction);
+          final List<TransactionModel> transactions = [];
+
+          if (event.snapshot.value != null) {
+            final Map<dynamic, dynamic> values = event.snapshot.value as Map<dynamic, dynamic>;
+            values.forEach((key, value) {
+              try {
+                final transactionData = Map<String, dynamic>.from(value as Map);
+                transactionData['id'] = key;
+                final transaction = TransactionModel.fromJson(transactionData);
+                transactions.add(transaction);
+              } catch (e, st) {
+                print('Error parsing transaction with key $key (watchTransactionsByCategory $category): $e\n$st');
+              }
+            });
+          }
+          transactions.sort((a, b) => b.date.compareTo(a.date));
+          return transactions;
         });
-      }
-      
-      transactions.sort((a, b) => b.date.compareTo(a.date));
-      return transactions;
-    });
   }
 
   /// Get statistics untuk dashboard
   Future<Map<String, dynamic>> getTransactionStatistics() async {
     try {
       final transactions = await fetchTransactions();
-      
+
       final totalIncome = transactions
           .where((t) => t.isIncome)
           .fold(0.0, (sum, t) => sum + t.amount);
-      
+
       final totalExpense = transactions
           .where((t) => !t.isIncome)
           .fold(0.0, (sum, t) => sum + t.amount);
-      
+
       final balance = totalIncome - totalExpense;
-      
+
       final transactionCount = transactions.length;
       final incomeCount = transactions.where((t) => t.isIncome).length;
       final expenseCount = transactions.where((t) => !t.isIncome).length;
-      
+
       // Get categories
       final categories = <String, double>{};
       for (var transaction in transactions) {
-        categories[transaction.category] = 
+        categories[transaction.category] =
             (categories[transaction.category] ?? 0) + transaction.amount;
       }
-      
+
       return {
         'totalIncome': totalIncome,
         'totalExpense': totalExpense,
@@ -330,8 +448,12 @@ class FinanceRepository {
         'expenseCount': expenseCount,
         'categories': categories,
       };
-    } catch (e) {
-      throw Exception('Failed to get transaction statistics: $e');
+    } on FirebaseException catch (e, st) {
+      print('Firebase Error getting transaction statistics: ${e.message} (${e.code})\n$st');
+      rethrow;
+    } catch (e, st) {
+      print('Unexpected Error getting transaction statistics: $e\n$st');
+      rethrow;
     }
   }
 }

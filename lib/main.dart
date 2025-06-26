@@ -10,12 +10,12 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: "AIzaSyBMYRsnkEAaKJM661Q8vPROW4aI3r6Gd9Q",
-      appId: "1:664950467657:android:890766958a62fc1eb1e398",
-      messagingSenderId: "664950467657",
-      projectId: "timmingmatters",
-      databaseURL: "https://timmingmatters-default-rtdb.firebaseio.com",
-      storageBucket: "timmingmatters.firebasestorage.app",
+      apiKey: "AIzaSyDF8zpOC46WCJ3OZaHS4xYJppz_iNt-pPk", 
+      appId: "1:523600901086:android:33685a8b65be0a2cfd234f", 
+      messagingSenderId: "523600901086", 
+      projectId: "hexagontm-7062a", 
+      databaseURL: "https://hexagontm-7062a-default-rtdb.firebaseio.com", 
+      storageBucket: "hexagontm-7062a.firebasestorage.app", 
     ),
   );
 
