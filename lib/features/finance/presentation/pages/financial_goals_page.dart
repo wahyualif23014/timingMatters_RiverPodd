@@ -1,13 +1,13 @@
 // presentation/pages/financial_goals_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart'; // For generating unique IDs
-import 'package:firebase_core/firebase_core.dart'; // Import for FirebaseException
+import 'package:uuid/uuid.dart'; 
+import 'package:firebase_core/firebase_core.dart';
 import '../../data/models/financial_goal_model.dart';
 import '../../data/providers/financial_goals_provider.dart';
-import 'package:glassmorphism/glassmorphism.dart'; // Import glassmorphism
-import 'package:flutter_animate/flutter_animate.dart'; // Import flutter_animate
-import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:glassmorphism/glassmorphism.dart'; 
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart'; 
 
 class FinancialGoalsPage extends ConsumerWidget {
   const FinancialGoalsPage({super.key});
@@ -242,11 +242,11 @@ class FinancialGoalsPage extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              'Target: \$${goal.targetAmount.toStringAsFixed(2)}',
+                              'Target: Rp${goal.targetAmount.toStringAsFixed(2)}',
                               style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.8)),
                             ),
                             Text(
-                              'Saved: \$${goal.savedAmount.toStringAsFixed(2)}',
+                              'Saved: Rp${goal.savedAmount.toStringAsFixed(2)}',
                               style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.8)),
                             ),
                             LinearProgressIndicator(
