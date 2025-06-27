@@ -28,12 +28,16 @@ class FinancialGoalsPage extends ConsumerWidget {
     final financialGoalsAsyncValue = ref.watch(financialGoalsProvider);
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
+    final mediaQueryData = MediaQuery.of(context);
+    final safeAreaBottom = mediaQueryData.padding.bottom;
+    final appBarHeight = kToolbarHeight; // Standard AppBar height
+
     return Scaffold(
       extendBodyBehindAppBar: true, // Allow body to go behind transparent app bar
       appBar: AppBar(
         title: Text(
           'Financial Goals',
-          style: GoogleFonts.inter( // Use Inter font for a clean look
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 22,
@@ -47,7 +51,6 @@ class FinancialGoalsPage extends ConsumerWidget {
             color: Colors.white,
           ),
           onPressed: () {
-            // Use Navigator.pop for simple back navigation in this context
             Navigator.of(context).pop();
           },
         ),
@@ -79,12 +82,12 @@ class FinancialGoalsPage extends ConsumerWidget {
               debugPrint('Error loading financial goals: $error\n$stack'); // Log full error for debugging
               return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(24.0),
                   child: Animate(
                     effects: [FadeEffect(duration: 600.ms), ScaleEffect(duration: 600.ms, curve: Curves.easeOutBack)],
                     child: GlassmorphicContainer(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: MediaQuery.of(context).size.height * 0.3,
+                      width: mediaQueryData.size.width * 0.8,
+                      height: mediaQueryData.size.height * 0.35,
                       borderRadius: 24,
                       blur: 15,
                       alignment: Alignment.center,
@@ -109,19 +112,19 @@ class FinancialGoalsPage extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.error_outline, color: Colors.white, size: 50).animate().shake(hz: 2, curve: Curves.easeInOut),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 16),
                           Text(
                             errorMessage,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () {
                               ref.invalidate(financialGoalsProvider);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.2), // Glassy button
+                              backgroundColor: Colors.white.withOpacity(0.2),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
@@ -140,12 +143,12 @@ class FinancialGoalsPage extends ConsumerWidget {
               if (goals.isEmpty) {
                 return Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(24.0),
                     child: Animate(
                       effects: [FadeEffect(duration: 600.ms), SlideEffect(begin: Offset(0, 0.2), duration: 600.ms, curve: Curves.easeOutCubic)],
                       child: GlassmorphicContainer(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.height * 0.3,
+                        width: mediaQueryData.size.width * 0.8,
+                        height: mediaQueryData.size.height * 0.35,
                         borderRadius: 24,
                         blur: 15,
                         alignment: Alignment.center,
@@ -170,7 +173,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(Icons.lightbulb_outline, color: Colors.white, size: 60),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 16),
                             Text(
                               'Tidak ada target keuangan yang ditemukan.\nMari tambahkan target pertamamu!',
                               textAlign: TextAlign.center,
@@ -184,7 +187,13 @@ class FinancialGoalsPage extends ConsumerWidget {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.only(top: kToolbarHeight + 40, left: 16.0, right: 16.0, bottom: 80.0), // Adjust padding for app bar and FAB
+                // Use a slightly larger bottom padding to ensure it clears the FAB
+                padding: EdgeInsets.fromLTRB(
+                  16.0,
+                  appBarHeight + mediaQueryData.padding.top + 20, // Dynamic top padding
+                  16.0,
+                  safeAreaBottom + 90.0, // Increased bottom padding for FAB clearance
+                ),
                 itemCount: goals.length,
                 itemBuilder: (context, index) {
                   final goal = goals[index];
@@ -197,10 +206,10 @@ class FinancialGoalsPage extends ConsumerWidget {
                     ],
                     child: GlassmorphicContainer(
                       width: double.infinity,
-                      height: 200, // Add a suitable height value here
+                      height: 220,
                       borderRadius: 16,
                       blur: 10,
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
                       alignment: Alignment.center,
                       border: 1.5,
                       linearGradient: LinearGradient(
@@ -220,7 +229,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -232,7 +241,6 @@ class FinancialGoalsPage extends ConsumerWidget {
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 8),
                             Text(
                               'Target: \$${goal.targetAmount.toStringAsFixed(2)}',
                               style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.8)),
@@ -241,26 +249,24 @@ class FinancialGoalsPage extends ConsumerWidget {
                               'Saved: \$${goal.savedAmount.toStringAsFixed(2)}',
                               style: GoogleFonts.inter(fontSize: 16, color: Colors.white.withOpacity(0.8)),
                             ),
-                            const SizedBox(height: 12),
                             LinearProgressIndicator(
                               value: progress,
                               backgroundColor: Colors.white.withOpacity(0.3),
-                              color: Colors.lightGreenAccent, // Brighter color for progress
+                              color: Colors.lightGreenAccent,
                               minHeight: 10,
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 10),
                             Text(
                               'Progress: ${(progress * 100).toStringAsFixed(1)}%',
                               style: GoogleFonts.inter(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.white.withOpacity(0.7)),
                             ),
-                            const SizedBox(height: 12),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                _buildGlassyIconButton(context, Icons.edit, Colors.blueAccent, () => _showGoalForm(context, ref, goal: goal)),
-                                _buildGlassyIconButton(context, Icons.add, Colors.lightGreenAccent, () { _showAddProgressDialog(context, ref, goal); }),
-                                _buildGlassyIconButton(context, Icons.delete, Colors.redAccent, () => _confirmDelete(context, ref, goal.id, goal.title)),
+                                _buildGlassyIconButton(context, Icons.edit, Colors.blueAccent, () => _showGoalForm(context, ref, goal: goal), tooltip: 'Edit Goal'),
+                                _buildGlassyIconButton(context, Icons.add, Colors.lightGreenAccent, () { _showAddProgressDialog(context, ref, goal); }, tooltip: 'Add Progress'),
+                                _buildGlassyIconButton(context, Icons.delete, Colors.redAccent, () => _confirmDelete(context, ref, goal.id, goal.title), tooltip: 'Delete Goal'),
                               ],
                             ),
                           ],
@@ -280,7 +286,7 @@ class FinancialGoalsPage extends ConsumerWidget {
           onPressed: () => _showGoalForm(context, ref),
           label: Text('Add Goal', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
           icon: const Icon(Icons.add),
-          backgroundColor: Colors.white.withOpacity(0.2), // Glassy FAB
+          backgroundColor: Colors.white.withOpacity(0.2),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -292,13 +298,14 @@ class FinancialGoalsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildGlassyIconButton(BuildContext context, IconData icon, Color color, VoidCallback onPressed) {
+  // Modified to include tooltip parameter
+  Widget _buildGlassyIconButton(BuildContext context, IconData icon, Color color, VoidCallback onPressed, {String? tooltip}) {
     return Animate(
       effects: [ScaleEffect(duration: 200.ms, curve: Curves.easeInOut)],
       child: IconButton(
         icon: Icon(icon, color: color.withOpacity(0.8), size: 28),
         onPressed: onPressed,
-        tooltip: 'Edit', // Add tooltip for accessibility
+        tooltip: tooltip,
       ),
     );
   }
@@ -313,12 +320,12 @@ class FinancialGoalsPage extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.transparent, // Make background transparent for glassmorphism
-          contentPadding: EdgeInsets.zero, // Remove default padding
+          backgroundColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           content: GlassmorphicContainer(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: 420, // Add a suitable height for the dialog
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: goal == null ? 420 : 360,
             borderRadius: 24,
             blur: 15,
             border: 2,
@@ -326,7 +333,7 @@ class FinancialGoalsPage extends ConsumerWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.blueGrey.withOpacity(0.15), // Darker glassmorphism for dialogs
+                Colors.blueGrey.withOpacity(0.15),
                 Colors.blueGrey.withOpacity(0.05),
               ],
             ),
@@ -347,7 +354,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                     goal == null ? 'Add New Goal' : 'Edit Goal',
                     style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   TextField(
                     controller: titleController,
                     style: GoogleFonts.inter(color: Colors.white),
@@ -360,7 +367,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                       fillColor: Colors.white.withOpacity(0.1),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: targetAmountController,
                     style: GoogleFonts.inter(color: Colors.white),
@@ -374,7 +381,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                     ),
                     keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
                   if (goal == null)
                     TextField(
                       controller: savedAmountController,
@@ -389,7 +396,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                       ),
                       keyboardType: TextInputType.number,
                     ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -398,7 +405,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                         style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.7)),
                         child: const Text('Cancel'),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () async {
                           final title = titleController.text.trim();
@@ -444,6 +451,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
                         child: Text(goal == null ? 'Add ' : 'Update'),
                       ),
@@ -469,8 +477,8 @@ class FinancialGoalsPage extends ConsumerWidget {
           contentPadding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           content: GlassmorphicContainer(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: 260, // Add a suitable height for the dialog
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: 280,
             borderRadius: 24,
             blur: 15,
             border: 2,
@@ -500,7 +508,6 @@ class FinancialGoalsPage extends ConsumerWidget {
                     style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 20),
                   TextField(
                     controller: amountController,
                     style: GoogleFonts.inter(color: Colors.white),
@@ -523,7 +530,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                         style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.7)),
                         child: const Text('Batal'),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () async {
                           final amountToAdd = double.tryParse(amountController.text) ?? 0.0;
@@ -574,8 +581,8 @@ class FinancialGoalsPage extends ConsumerWidget {
           contentPadding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           content: GlassmorphicContainer(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: 220, // Added required height parameter
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: 250,
             borderRadius: 24,
             blur: 15,
             border: 2,
@@ -604,13 +611,13 @@ class FinancialGoalsPage extends ConsumerWidget {
                     'Konfirmasi Penghapusan',
                     style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
                   Text(
                     'Apakah Anda yakin ingin menghapus target "$title"?',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(color: Colors.white.withOpacity(0.8), fontSize: 16),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -619,7 +626,7 @@ class FinancialGoalsPage extends ConsumerWidget {
                         style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.7)),
                         child: const Text('Batal'),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () async {
                           try {
@@ -636,10 +643,11 @@ class FinancialGoalsPage extends ConsumerWidget {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent.withOpacity(0.2), // Red for delete, glassy
+                          backgroundColor: Colors.redAccent.withOpacity(0.2),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           side: BorderSide(color: Colors.redAccent.withOpacity(0.3), width: 1),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
                         child: const Text('Hapus', style: TextStyle(color: Colors.white)),
                       ),
