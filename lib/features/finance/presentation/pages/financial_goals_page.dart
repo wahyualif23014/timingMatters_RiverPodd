@@ -12,7 +12,6 @@ import 'package:google_fonts/google_fonts.dart';
 class FinancialGoalsPage extends ConsumerWidget {
   const FinancialGoalsPage({super.key});
 
-  // Helper function to show a SnackBar
   void _showSnackBar(BuildContext context, String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -30,7 +29,7 @@ class FinancialGoalsPage extends ConsumerWidget {
 
     final mediaQueryData = MediaQuery.of(context);
     final safeAreaBottom = mediaQueryData.padding.bottom;
-    final appBarHeight = kToolbarHeight; // Standard AppBar height
+    final appBarHeight = kToolbarHeight; 
 
     return Scaffold(
       extendBodyBehindAppBar: true, // Allow body to go behind transparent app bar
