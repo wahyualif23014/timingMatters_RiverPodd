@@ -34,18 +34,18 @@ final appRouter = GoRouter(
       path: Routes.financeOverview,
       builder: (context, state) => const FinanceOverviewPage(),
     ),
-    GoRoute(
-      path: Routes.addTransaction,
-      builder: (context, state) => const AddTransactionPage(),
-    ),
+    // GoRoute(
+    //   path: Routes.addTransaction,
+    //   builder: (context, state) => const AddTransactionPage(),
+    // ),
     GoRoute(
       path: Routes.budget,
       builder: (context, state) => const BudgetPage(),
     ),
-    GoRoute(
-      path: Routes.goals,
-      builder: (context, state) => const FinancialGoalsPage(),
-    ),
+    // GoRoute(
+    //   path: Routes.goals,
+    //   builder: (context, state) => const FinancialGoalsPage(),
+    // ),
 
     //     // Habits
     //     GoRoute(

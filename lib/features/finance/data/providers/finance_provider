@@ -1,0 +1,121 @@
+// data/providers/finance_providers.dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+import '../models/budget_model.dart';
+import '../models/expense_model.dart'; // Assuming this is your 'transaction' model
+import '../models/financial_goal_model.dart'; // Assuming you have this model
+
+import '../repositories/finance_repository.dart';
+
+final financeRepositoryProvider = Provider<FinanceRepository>((ref) {
+  return FinanceRepository(FirebaseDatabase.instance);
+});
+
+// --- Budget Providers ---
+final budgetsStreamProvider = StreamProvider<List<BudgetModel>>((ref) {
+  return ref.watch(financeRepositoryProvider).budgets.getBudgetsStream();
+});
+
+final addBudgetProvider = FutureProvider.family<void, BudgetModel>((ref, model) async {
+  await ref.read(financeRepositoryProvider).budgets.addBudget(model);
+  ref.invalidate(budgetsStreamProvider);
+});
+
+final updateBudgetProvider = FutureProvider.family<void, BudgetModel>((ref, model) async {
+  await ref.read(financeRepositoryProvider).budgets.updateBudget(model);
+  ref.invalidate(budgetsStreamProvider);
+});
+
+final deleteBudgetProvider = FutureProvider.family<void, String>((ref, id) async {
+  await ref.read(financeRepositoryProvider).budgets.deleteBudget(id);
+  ref.invalidate(budgetsStreamProvider);
+});
+
+// --- Expense (Transaction) Providers ---
+final transactionsStreamProvider = StreamProvider.family<List<ExpenseModel>, Map<String, dynamic>?>((ref, filters) {
+  final category = filters?['category'] as String?;
+  final startDate = filters?['startDate'] as DateTime?;
+  final endDate = filters?['endDate'] as DateTime?;
+  final limit = filters?['limit'] as int?;
+
+  return ref.watch(financeRepositoryProvider).transactions.getTransactionsStream(
+    category: category,
+    startDate: startDate,
+    endDate: endDate,
+    limit: limit,
+  );
+});
+
+final addTransactionProvider = FutureProvider.family<void, ExpenseModel>((ref, model) async {
+  await ref.read(financeRepositoryProvider).transactions.addTransaction(model);
+  ref.invalidate(transactionsStreamProvider(null)); // Invalidate to refresh all transactions
+});
+
+final updateTransactionProvider = FutureProvider.family<void, Map<String, ExpenseModel>>((ref, models) async {
+  final oldModel = models['oldModel']!;
+  final newModel = models['newModel']!;
+  await ref.read(financeRepositoryProvider).transactions.updateTransaction(oldModel, newModel);
+  ref.invalidate(transactionsStreamProvider(null));
+});
+
+final deleteTransactionProvider = FutureProvider.family<void, ExpenseModel>((ref, model) async {
+  await ref.read(financeRepositoryProvider).transactions.deleteTransaction(model);
+  ref.invalidate(transactionsStreamProvider(null));
+});
+
+final deleteMultipleTransactionsProvider = FutureProvider.family<void, List<String>>((ref, ids) async {
+  await ref.read(financeRepositoryProvider).transactions.deleteMultipleTransactions(ids);
+  ref.invalidate(transactionsStreamProvider(null));
+});
+
+final clearAllTransactionsProvider = FutureProvider<void>((ref) async {
+  await ref.read(financeRepositoryProvider).transactions.clearAllTransactions();
+  ref.invalidate(transactionsStreamProvider(null));
+});
+
+// --- Financial Goal Providers ---
+final financialGoalsStreamProvider = StreamProvider<List<FinancialGoalModel>>((ref) {
+  return ref.watch(financeRepositoryProvider).goals.getGoalsStream();
+});
+
+final addFinancialGoalProvider = FutureProvider.family<void, FinancialGoalModel>((ref, model) async {
+  await ref.read(financeRepositoryProvider).goals.addGoal(model);
+  ref.invalidate(financialGoalsStreamProvider);
+});
+
+final updateFinancialGoalProvider = FutureProvider.family<void, Map<String, dynamic>>((ref, args) async {
+  final id = args['id'] as String;
+  final updates = args['updates'] as Map<String, dynamic>;
+  await ref.read(financeRepositoryProvider).goals.updateGoal(id, updates);
+  ref.invalidate(financialGoalsStreamProvider);
+});
+
+final deleteFinancialGoalProvider = FutureProvider.family<void, String>((ref, id) async {
+  await ref.read(financeRepositoryProvider).goals.deleteGoal(id);
+  ref.invalidate(financialGoalsStreamProvider);
+});
+
+// --- Financial Statistics Providers ---
+final transactionStatisticsStreamProvider = StreamProvider<Map<String, dynamic>>((ref) {
+  return ref.watch(financeRepositoryProvider).transactions.getTransactionStatisticsStream();
+});
+
+// Provider to get a single budget by its ID from the stream of all budgets
+final budgetByIdProvider = StreamProvider.family<BudgetModel?, String>((ref, budgetId) {
+  // We watch the stream of all budgets, then map each list emitted by that stream
+  // to find the specific budget we're looking for.
+  return ref.watch(budgetsStreamProvider.stream).map((budgets) {
+    try {
+      return budgets.firstWhere((budget) => budget.id == budgetId);
+    } catch (e) {
+      // If budget is not found, you can return null or rethrow a specific exception
+      print('Budget with ID $budgetId not found: $e');
+      return null;
+    }
+  }).handleError((error, stackTrace) {
+    // Handle errors from the underlying stream
+    print('Stream Error in budgetByIdProvider for $budgetId: $error\n$stackTrace');
+    return null; // Return null on error, or you could rethrow if it's critical
+  });
+});

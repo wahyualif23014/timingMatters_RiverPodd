@@ -8,62 +8,75 @@ class GlassContainer extends StatelessWidget {
   final double? height;
   final double borderRadius;
   final double blur;
-  final double border;
+  final double opacity;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final AlignmentGeometry alignment;
   final List<Color>? linearGradientColors;
   final List<Color>? borderGradientColors;
+  final BoxBorder? customBorder;
 
   const GlassContainer({
     super.key,
     required this.child,
     this.width,
     this.height,
-    this.borderRadius = 16, // Default radius for consistency
-    this.blur = 10,       // Default blur intensity
-    this.border = 1.5,    // Default border width
+    this.opacity = 0.1, // Default opacity for a subtle glass effect
+    this.borderRadius = 16,
+    this.blur = 10,
     this.padding,
     this.margin,
     this.alignment = Alignment.center,
     this.linearGradientColors,
     this.borderGradientColors,
+    this.customBorder,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Default blue-ish glassmorphism colors
-    final defaultLinearGradientColors = [
-      Colors.white.withOpacity(0.1),
-      Colors.white.withOpacity(0.02),
+    final List<Color> resolvedLinearGradientColors = linearGradientColors ?? [
+      Colors.white.withOpacity(opacity * 0.8),
+      Colors.grey.withOpacity(opacity * 0.4),
     ];
-    final defaultBorderGradientColors = [
+
+    final List<Color> resolvedBorderGradientColors = borderGradientColors ?? [
       Colors.white.withOpacity(0.4),
-      Colors.white.withOpacity(0.01),
+      Colors.white.withOpacity(0.1),
     ];
 
     return Container(
       margin: margin,
-      child: GlassmorphicContainer(
-        width: width ?? double.infinity,
-        height: height ?? double.infinity,
-        borderRadius: borderRadius,
-        blur: blur,
-        alignment: alignment,
-        border: border,
-        linearGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: linearGradientColors ?? defaultLinearGradientColors,
-        ),
-        borderGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: borderGradientColors ?? defaultBorderGradientColors,
-        ),
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero, // Apply padding if provided
-          child: child,
+      width: width ?? double.infinity,
+      height: height ?? double.infinity,
+      decoration: BoxDecoration(
+        border: customBorder,
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: GlassmorphicContainer(
+          width: width ?? double.infinity,
+          height: height ?? double.infinity,
+          borderRadius: 0, // Handled by ClipRRect
+          blur: blur,
+          alignment: alignment,
+          border: 0, // Handled by customBorder in outer Container
+          linearGradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: resolvedLinearGradientColors,
+          ),
+          borderGradient: customBorder == null
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: resolvedBorderGradientColors,
+                )
+              : const LinearGradient(colors: [Colors.transparent, Colors.transparent]), // No border gradient if customBorder is provided
+          child: Padding(
+            padding: padding ?? EdgeInsets.zero,
+            child: child,
+          ),
         ),
       ),
     );
